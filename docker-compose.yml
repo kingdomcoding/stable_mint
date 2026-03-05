@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stable_mint_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    ports:
+      - "4400:4400"
+    environment:
+      DATABASE_URL: ecto://postgres:postgres@db/stable_mint_dev
+      SECRET_KEY_BASE: "dev-only-secret-key-base-that-is-at-least-64-bytes-long-for-phoenix"
+      PHX_SERVER: "true"
+      PHX_HOST: "localhost"
+      PORT: "4400"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  dashboard:
+    build:
+      context: ./dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4400/api
+    depends_on:
+      - api
+    restart: always
+
+volumes:
+  pgdata:
