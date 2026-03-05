@@ -3,9 +3,11 @@ defmodule StableMintWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug StableMintWeb.Plugs.IdempotencyKey
   end
 
-  scope "/api", StableMintWeb do
+  scope "/api" do
     pipe_through :api
+    forward "/", StableMintWeb.AshJsonApiRouter
   end
 end
