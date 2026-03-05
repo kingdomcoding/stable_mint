@@ -24,6 +24,7 @@ RUN mix deps.compile
 
 COPY lib lib
 COPY priv priv
+COPY rel rel
 
 RUN mix compile
 RUN mix release
