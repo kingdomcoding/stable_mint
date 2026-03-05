@@ -19,15 +19,13 @@ ENV MIX_ENV="prod"
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
-COPY config/config.exs config/runtime.exs config/
+COPY config/config.exs config/prod.exs config/runtime.exs config/
 RUN mix deps.compile
 
 COPY lib lib
 COPY priv priv
 
 RUN mix compile
-
-COPY config/prod.exs config/
 RUN mix release
 
 FROM ${RUNNER_IMAGE}
