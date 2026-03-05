@@ -131,6 +131,7 @@ defmodule StableMint.Platform.Transfer do
 
     update :processing do
       accept []
+      require_atomic? false
       argument :chain_tx_hash, :string, allow_nil?: false
 
       change fn changeset, _context ->
@@ -153,6 +154,7 @@ defmodule StableMint.Platform.Transfer do
 
     update :fail do
       accept []
+      require_atomic? false
       argument :error_reason, :string, allow_nil?: false
 
       change fn changeset, _context ->

@@ -80,6 +80,7 @@ defmodule StableMint.Stablecoins.Stablecoin do
 
     update :adjust_supply do
       accept []
+      require_atomic? false
       argument :delta, :decimal, allow_nil?: false
 
       change fn changeset, _context ->
