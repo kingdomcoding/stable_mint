@@ -42,8 +42,6 @@ defmodule StableMint.Stablecoins.Deployment do
       allow_nil? false
       public? true
     end
-
-    has_many :transfers, StableMint.Platform.Transfer
   end
 
   identities do
@@ -57,6 +55,7 @@ defmodule StableMint.Stablecoins.Deployment do
       accept [:chain, :stablecoin_id]
 
       change fn changeset, _context ->
+
         chain = Ash.Changeset.get_attribute(changeset, :chain)
         addr = StableMint.Chains.Registry.generate_mock_contract(chain)
         Ash.Changeset.force_change_attribute(changeset, :contract_address, addr)
