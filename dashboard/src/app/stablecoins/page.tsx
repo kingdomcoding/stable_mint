@@ -1,25 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { StableMintClient } from "@/lib/api-client";
-import type { Stablecoin, Deployment } from "@/lib/types";
+import type { Stablecoin, Deployment, Address, Account } from "@/lib/types";
+import MintForm from "@/components/MintForm";
+import BurnForm from "@/components/BurnForm";
+import ChainBadge from "@/components/ChainBadge";
 
 export default function StablecoinsPage() {
   const [stablecoins, setStablecoins] = useState<Stablecoin[]>([]);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
     Promise.all([
       StableMintClient.getStablecoins(),
       StableMintClient.getDeployments(),
+      StableMintClient.getAccounts(),
     ])
-      .then(([coins, deps]) => {
+      .then(async ([coins, deps, accts]) => {
         setStablecoins(coins);
         setDeployments(deps);
+        setAccounts(accts);
+        const allAddresses = await Promise.all(
+          accts.map((a) => StableMintClient.getAddresses(a.id))
+        );
+        setAddresses(allAddresses.flat());
       })
       .catch((err) => setError(String(err)));
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (error) {
     return <p className="text-red-500">Failed to load: {error}</p>;
@@ -28,6 +43,19 @@ export default function StablecoinsPage() {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Stablecoins</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <MintForm
+          deployments={deployments}
+          addresses={addresses}
+          onSuccess={loadData}
+        />
+        <BurnForm
+          deployments={deployments}
+          addresses={addresses}
+          onSuccess={loadData}
+        />
+      </div>
 
       {stablecoins.map((coin) => {
         const coinDeployments = deployments.filter(
@@ -70,8 +98,8 @@ export default function StablecoinsPage() {
                       key={dep.id}
                       className="border rounded p-2 text-sm dark:border-gray-600"
                     >
-                      <p className="font-medium capitalize">{dep.chain}</p>
-                      <p className="font-mono text-xs text-gray-500 truncate">
+                      <ChainBadge chain={dep.chain} />
+                      <p className="font-mono text-xs text-gray-500 truncate mt-1">
                         {dep.contract_address}
                       </p>
                       <div className="flex gap-2 mt-1">
@@ -102,6 +130,40 @@ export default function StablecoinsPage() {
           </div>
         );
       })}
+
+      {accounts.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-3">Accounts</h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b dark:border-gray-700 text-left">
+                <th className="pb-2">Name</th>
+                <th className="pb-2">Type</th>
+                <th className="pb-2">Status</th>
+                <th className="pb-2">Addresses</th>
+              </tr>
+            </thead>
+            <tbody>
+              {accounts.map((a) => (
+                <tr key={a.id} className="border-b dark:border-gray-800">
+                  <td className="py-2">{a.name}</td>
+                  <td className="py-2 capitalize">{a.type}</td>
+                  <td className="py-2 capitalize">{a.status}</td>
+                  <td className="py-2">
+                    {addresses
+                      .filter((addr) => addr.account_id === a.id)
+                      .map((addr) => (
+                        <span key={addr.id} className="mr-2">
+                          <ChainBadge chain={addr.chain} />
+                        </span>
+                      ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

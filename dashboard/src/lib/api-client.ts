@@ -2,6 +2,7 @@ import type {
   Stablecoin,
   Deployment,
   Account,
+  Address,
   Transfer,
   LedgerEntry,
   AuditResult,
@@ -58,6 +59,13 @@ export const StableMintClient = {
   async getAccounts(): Promise<Account[]> {
     const doc = await request<JsonApiDocument<Omit<Account, "id">>>("/accounts");
     return extractAttributes(doc) as Account[];
+  },
+
+  async getAddresses(accountId: string): Promise<Address[]> {
+    const doc = await request<JsonApiDocument<Omit<Address, "id">>>(
+      `/accounts/${accountId}/addresses`
+    );
+    return extractAttributes(doc) as Address[];
   },
 
   async getTransfers(accountId: string): Promise<Transfer[]> {
