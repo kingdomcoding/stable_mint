@@ -196,6 +196,20 @@ export const StableMintClient = {
     return extractOne(doc) as Stablecoin;
   },
 
+  async resumeStablecoin(id: string): Promise<Stablecoin> {
+    const doc = await request<JsonApiDocument<Omit<Stablecoin, "id">>>(
+      `/stablecoins/${id}/resume`,
+      {
+        method: "PATCH",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
+        body: JSON.stringify({
+          data: { type: "stablecoins", attributes: {} },
+        }),
+      }
+    );
+    return extractOne(doc) as Stablecoin;
+  },
+
   async deployToChain(params: {
     stablecoinId: string;
     chain: "ethereum" | "solana" | "stellar";
@@ -247,6 +261,20 @@ export const StableMintClient = {
   async suspendAccount(id: string): Promise<Account> {
     const doc = await request<JsonApiDocument<Omit<Account, "id">>>(
       `/accounts/${id}/suspend`,
+      {
+        method: "PATCH",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
+        body: JSON.stringify({
+          data: { type: "accounts", attributes: {} },
+        }),
+      }
+    );
+    return extractOne(doc) as Account;
+  },
+
+  async reactivateAccount(id: string): Promise<Account> {
+    const doc = await request<JsonApiDocument<Omit<Account, "id">>>(
+      `/accounts/${id}/reactivate`,
       {
         method: "PATCH",
         headers: { "Idempotency-Key": crypto.randomUUID() },
