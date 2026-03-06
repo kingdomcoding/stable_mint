@@ -153,6 +153,7 @@ export const StableMintClient = {
       "/stablecoins",
       {
         method: "POST",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify({
           data: {
             type: "stablecoins",
@@ -170,9 +171,10 @@ export const StableMintClient = {
 
   async pauseStablecoin(id: string): Promise<Stablecoin> {
     const doc = await request<JsonApiDocument<Omit<Stablecoin, "id">>>(
-      `/stablecoins/${id}`,
+      `/stablecoins/${id}/pause`,
       {
         method: "PATCH",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify({
           data: { type: "stablecoins", attributes: {} },
         }),
@@ -189,6 +191,7 @@ export const StableMintClient = {
       "/deployments",
       {
         method: "POST",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify({
           data: {
             type: "deployments",
@@ -212,6 +215,7 @@ export const StableMintClient = {
       "/accounts",
       {
         method: "POST",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify({
           data: {
             type: "accounts",
@@ -229,9 +233,10 @@ export const StableMintClient = {
 
   async suspendAccount(id: string): Promise<Account> {
     const doc = await request<JsonApiDocument<Omit<Account, "id">>>(
-      `/accounts/${id}`,
+      `/accounts/${id}/suspend`,
       {
         method: "PATCH",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify({
           data: { type: "accounts", attributes: {} },
         }),
@@ -250,6 +255,7 @@ export const StableMintClient = {
       `/accounts/${params.accountId}/addresses`,
       {
         method: "POST",
+        headers: { "Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify({
           data: {
             type: "addresses",
