@@ -74,5 +74,15 @@ defmodule StableMint.Banking.Account do
 
       change set_attribute(:status, :suspended)
     end
+
+    update :reactivate do
+      accept []
+
+      validate attribute_equals(:status, :suspended) do
+        message "can only reactivate suspended accounts"
+      end
+
+      change set_attribute(:status, :active)
+    end
   end
 end

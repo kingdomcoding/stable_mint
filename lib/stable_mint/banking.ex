@@ -8,7 +8,8 @@ defmodule StableMint.Banking do
         get :read
         index :read
         post :create
-        patch :suspend
+        patch :suspend, route: "/:id/suspend"
+        patch :reactivate, route: "/:id/reactivate"
       end
 
       base_route "/accounts/:account_id/addresses", StableMint.Banking.Address do
@@ -25,6 +26,7 @@ defmodule StableMint.Banking do
       define :get_account, action: :read, get_by: [:id]
       define :list_accounts, action: :read
       define :suspend_account, action: :suspend
+      define :reactivate_account, action: :reactivate
     end
 
     resource StableMint.Banking.Address do

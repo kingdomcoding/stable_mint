@@ -79,6 +79,16 @@ defmodule StableMint.Stablecoins.Stablecoin do
       change set_attribute(:status, :paused)
     end
 
+    update :resume do
+      accept []
+
+      validate attribute_equals(:status, :paused) do
+        message "can only resume paused stablecoins"
+      end
+
+      change set_attribute(:status, :active)
+    end
+
     update :adjust_supply do
       accept []
       require_atomic? false

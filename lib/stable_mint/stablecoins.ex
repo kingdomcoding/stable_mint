@@ -8,7 +8,8 @@ defmodule StableMint.Stablecoins do
         get :read
         index :read
         post :create
-        patch :pause
+        patch :pause, route: "/:id/pause"
+        patch :resume, route: "/:id/resume"
       end
 
       base_route "/deployments", StableMint.Stablecoins.Deployment do
@@ -25,6 +26,7 @@ defmodule StableMint.Stablecoins do
       define :get_stablecoin, action: :read, get_by: [:id]
       define :list_stablecoins, action: :read
       define :pause_stablecoin, action: :pause
+      define :resume_stablecoin, action: :resume
       define :adjust_supply, action: :adjust_supply, args: [:delta]
     end
 
