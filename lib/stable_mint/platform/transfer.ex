@@ -166,7 +166,7 @@ defmodule StableMint.Platform.Transfer do
     end
 
     read :by_account do
-      argument :account_id, :uuid, allow_nil?: false
+      argument :account_id, :uuid, allow_nil?: false, public?: true
 
       filter expr(
         source_id == ^arg(:account_id) or

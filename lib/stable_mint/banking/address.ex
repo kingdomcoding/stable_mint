@@ -56,7 +56,7 @@ defmodule StableMint.Banking.Address do
     end
 
     read :by_account do
-      argument :account_id, :uuid, allow_nil?: false
+      argument :account_id, :uuid, allow_nil?: false, public?: true
       filter expr(account_id == ^arg(:account_id))
     end
   end
