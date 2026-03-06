@@ -70,6 +70,15 @@ export default function AccountsPage() {
     }
   }
 
+  async function handleReactivate(account: Account) {
+    try {
+      await StableMintClient.reactivateAccount(account.id);
+      loadData();
+    } catch (err) {
+      setError(String(err));
+    }
+  }
+
   const sorted = [...accounts].sort((a, b) => {
     if (a.id === RESERVE_ID) return 1;
     if (b.id === RESERVE_ID) return -1;
@@ -124,6 +133,14 @@ export default function AccountsPage() {
                   className="px-2 py-0.5 border rounded text-xs hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
                 >
                   Suspend
+                </button>
+              )}
+              {account.status === "suspended" && (
+                <button
+                  onClick={() => handleReactivate(account)}
+                  className="px-2 py-0.5 border rounded text-xs text-green-700 border-green-300 hover:bg-green-50 dark:border-green-700 dark:hover:bg-green-950 dark:text-green-400"
+                >
+                  Reactivate
                 </button>
               )}
             </div>

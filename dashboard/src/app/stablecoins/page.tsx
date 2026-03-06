@@ -49,6 +49,15 @@ export default function StablecoinsPage() {
     }
   }
 
+  async function handleResume(coin: Stablecoin) {
+    try {
+      await StableMintClient.resumeStablecoin(coin.id);
+      loadData();
+    } catch (err) {
+      setError(String(err));
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -91,6 +100,14 @@ export default function StablecoinsPage() {
                     className="px-2 py-0.5 border rounded text-xs hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
                   >
                     Pause
+                  </button>
+                )}
+                {coin.status === "paused" && (
+                  <button
+                    onClick={() => handleResume(coin)}
+                    className="px-2 py-0.5 border rounded text-xs text-green-700 border-green-300 hover:bg-green-50 dark:border-green-700 dark:hover:bg-green-950 dark:text-green-400"
+                  >
+                    Resume
                   </button>
                 )}
               </div>
