@@ -100,7 +100,7 @@ export default function LedgerPage() {
             <th className="pb-2">Amount</th>
             <th className="pb-2">Currency</th>
             <th className="pb-2 text-right">Balance After</th>
-            <th className="pb-2">Account</th>
+            <th className="pb-2 pl-6">Account</th>
             <th className="pb-2">Created</th>
           </tr>
         </thead>
@@ -125,7 +125,7 @@ export default function LedgerPage() {
               <td className="py-2 text-right font-mono">
                 {parseFloat(entry.balance_after).toLocaleString()}
               </td>
-              <td className="py-2 text-sm">{accountName(entry.account_id)}</td>
+              <td className="py-2 pl-6 text-sm">{accountName(entry.account_id)}</td>
               <td className="py-2 text-gray-500">
                 {new Date(entry.inserted_at).toLocaleString()}
               </td>
