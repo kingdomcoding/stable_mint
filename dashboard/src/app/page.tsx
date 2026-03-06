@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { StableMintClient } from "@/lib/api-client";
-import type { Stablecoin, Deployment, Account, Address, AuditResult } from "@/lib/types";
-import QuickMint from "@/components/QuickMint";
+import type { Stablecoin, Transfer, Account, AuditResult } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const GITHUB_URL = "https://github.com/kingdomcoding/stable_mint";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4400/api";
@@ -40,34 +40,37 @@ const highlights = [
 
 export default function OverviewPage() {
   const [stablecoins, setStablecoins] = useState<Stablecoin[]>([]);
-  const [deployments, setDeployments] = useState<Deployment[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [audit, setAudit] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  function refreshStats() {
-    StableMintClient.getStablecoins().then(setStablecoins);
-    StableMintClient.getAudit().then(setAudit);
-  }
 
   useEffect(() => {
     Promise.all([
       StableMintClient.getStablecoins(),
-      StableMintClient.getDeployments(),
       StableMintClient.getAccounts(),
+      StableMintClient.getAllTransfers(),
       StableMintClient.getAudit(),
     ])
-      .then(async ([coins, deps, accts, auditResult]) => {
+      .then(([coins, accts, xfers, auditResult]) => {
         setStablecoins(coins);
-        setDeployments(deps);
+        setAccounts(accts);
+        setTransfers(xfers);
         setAudit(auditResult);
-        const allAddresses = await Promise.all(
-          accts.map((a: Account) => StableMintClient.getAddresses(a.id))
-        );
-        setAddresses(allAddresses.flat());
       })
       .catch((err) => setError(String(err)));
   }, []);
+
+  const accountName = (id: string | null) => {
+    if (!id) return "-";
+    return accounts.find((a) => a.id === id)?.name ?? id.slice(0, 8) + "...";
+  };
+
+  const recentTransfers = transfers.slice(0, 5);
+  const maxSupply = Math.max(
+    ...stablecoins.map((c) => parseFloat(c.total_supply || "0")),
+    1
+  );
 
   return (
     <div>
@@ -83,9 +86,9 @@ export default function OverviewPage() {
           >
             Brale&apos;s
           </a>{" "}
-          architecture. Mints, burns, and transfers flow through a
-          double-entry ledger with chain-specific adapters — all declared
-          via Ash Framework resources.
+          architecture. Mints, burns, and transfers flow through a double-entry
+          ledger with chain-specific adapters — all declared via Ash Framework
+          resources.
         </p>
         <div className="flex gap-3 mb-6">
           <a
@@ -105,7 +108,6 @@ export default function OverviewPage() {
             OpenAPI Spec
           </a>
         </div>
-
         <div className="flex flex-wrap gap-2 mb-6">
           {techStack.map((t) => (
             <span
@@ -119,7 +121,65 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="border rounded-lg p-4 dark:border-gray-700">
+          <p className="text-sm text-gray-500">Stablecoins</p>
+          <p className="text-3xl font-bold">{stablecoins.length}</p>
+        </div>
+        <div className="border rounded-lg p-4 dark:border-gray-700">
+          <p className="text-sm text-gray-500">Accounts</p>
+          <p className="text-3xl font-bold">
+            {accounts.filter((a) => a.type === "customer").length}
+          </p>
+        </div>
+        <div className="border rounded-lg p-4 dark:border-gray-700">
+          <p className="text-sm text-gray-500">Ledger Status</p>
+          <p className="text-3xl font-bold">
+            {audit ? (
+              <span
+                className={audit.balanced ? "text-green-600" : "text-red-600"}
+              >
+                {audit.balanced ? "Balanced" : "Unbalanced"}
+              </span>
+            ) : (
+              "..."
+            )}
+          </p>
+        </div>
+      </div>
+
+      <h3 className="text-lg font-semibold mb-3">Supply by Coin</h3>
+      <div className="border rounded-lg p-4 dark:border-gray-700 mb-8">
+        {stablecoins.map((coin) => {
+          const supply = parseFloat(coin.total_supply || "0");
+          const pct = maxSupply > 0 ? (supply / maxSupply) * 100 : 0;
+          return (
+            <div key={coin.id} className="flex items-center gap-3 py-2">
+              <span className="w-12 font-mono text-sm font-semibold">
+                {coin.symbol}
+              </span>
+              <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+                <div
+                  className="bg-gray-900 dark:bg-gray-200 h-full rounded-full transition-all"
+                  style={{ width: `${Math.max(pct, 2)}%` }}
+                />
+              </div>
+              <span className="w-24 text-right font-mono text-sm">
+                {supply.toLocaleString()}
+              </span>
+              {coin.status === "paused" && (
+                <span className="px-2 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  paused
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {highlights.map((h) => (
           <div
             key={h.title}
@@ -133,57 +193,37 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      <h3 className="text-lg font-semibold mb-3">Live System State</h3>
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="border rounded-lg p-4 dark:border-gray-700">
-          <p className="text-sm text-gray-500">Stablecoins</p>
-          <p className="text-3xl font-bold">{stablecoins.length}</p>
-        </div>
-        <div className="border rounded-lg p-4 dark:border-gray-700">
-          <p className="text-sm text-gray-500">Total Supply</p>
-          <p className="text-3xl font-bold">
-            {stablecoins
-              .reduce(
-                (sum, c) => sum + parseFloat(c.total_supply || "0"),
-                0
-              )
-              .toLocaleString()}
-          </p>
-        </div>
-        <div className="border rounded-lg p-4 dark:border-gray-700">
-          <p className="text-sm text-gray-500">Ledger Status</p>
-          <p className="text-3xl font-bold">
-            {audit ? (
-              <span
-                className={
-                  audit.balanced ? "text-green-600" : "text-red-600"
-                }
-              >
-                {audit.balanced ? "Balanced" : "Unbalanced"}
-              </span>
-            ) : (
-              "..."
-            )}
-          </p>
-        </div>
-      </div>
-
-      {(() => {
-        const ethDep = deployments.find((d) => d.chain === "ethereum");
-        const ethAddr = addresses.find((a) => a.chain === "ethereum");
-        if (ethDep && ethAddr) {
-          return (
-            <QuickMint
-              deployment={ethDep}
-              address={ethAddr}
-              onSuccess={refreshStats}
-            />
-          );
-        }
-        return null;
-      })()}
+      <h3 className="text-lg font-semibold mb-3">Recent Activity</h3>
+      {recentTransfers.length > 0 ? (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b dark:border-gray-700 text-left">
+              <th className="pb-2">Type</th>
+              <th className="pb-2">Amount</th>
+              <th className="pb-2">From / To</th>
+              <th className="pb-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentTransfers.map((t) => (
+              <tr key={t.id} className="border-b dark:border-gray-800">
+                <td className="py-2 capitalize">{t.type}</td>
+                <td className="py-2 font-mono">
+                  {parseFloat(t.amount).toLocaleString()} {t.currency}
+                </td>
+                <td className="py-2 text-sm text-gray-600 dark:text-gray-400">
+                  {accountName(t.source_id)} → {accountName(t.destination_id)}
+                </td>
+                <td className="py-2">
+                  <StatusBadge status={t.status} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="text-gray-500 text-sm">No activity yet</p>
+      )}
     </div>
   );
 }
