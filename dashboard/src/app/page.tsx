@@ -131,7 +131,7 @@ export default function OverviewPage() {
           <p className="text-3xl font-bold">{stablecoins.length}</p>
         </div>
         <div className="border rounded-lg p-4 dark:border-gray-700">
-          <p className="text-sm text-gray-500">Accounts</p>
+          <p className="text-sm text-gray-500">Customers</p>
           <p className="text-3xl font-bold">
             {accounts.filter((a) => a.type === "customer").length}
           </p>
