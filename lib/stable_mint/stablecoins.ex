@@ -24,6 +24,7 @@ defmodule StableMint.Stablecoins do
       define :get_stablecoin, action: :read, get_by: [:id]
       define :list_stablecoins, action: :read
       define :pause_stablecoin, action: :pause
+      define :adjust_supply, action: :adjust_supply, args: [:delta]
     end
 
     resource StableMint.Stablecoins.Deployment do

@@ -43,6 +43,7 @@ defmodule StableMint.Stablecoins.Stablecoin do
     attribute :total_supply, :decimal do
       default Decimal.new(0)
       allow_nil? false
+      public? true
     end
 
     create_timestamp :inserted_at, public?: true

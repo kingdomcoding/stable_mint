@@ -86,6 +86,7 @@ defmodule StableMint.Platform.Transfer do
       validate {StableMint.Validations.PositiveAmount, []}
 
       change {StableMint.Changes.RecordLedgerEntries, direction: :mint}
+      change {StableMint.Changes.AdjustSupply, direction: :mint}
       change {StableMint.Changes.DispatchToChain, []}
     end
 
@@ -108,6 +109,7 @@ defmodule StableMint.Platform.Transfer do
       validate {StableMint.Validations.SufficientBalance, []}, only_when_valid?: true
 
       change {StableMint.Changes.RecordLedgerEntries, direction: :burn}
+      change {StableMint.Changes.AdjustSupply, direction: :burn}
       change {StableMint.Changes.DispatchToChain, []}
     end
 
