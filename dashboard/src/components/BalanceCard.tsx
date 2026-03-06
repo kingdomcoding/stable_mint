@@ -8,11 +8,12 @@ export default function BalanceCard({
   currency: string;
 }) {
   return (
-    <div className="border rounded-lg p-4 dark:border-gray-700">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-2xl font-bold font-mono">
-        {parseFloat(amount).toLocaleString()} <span className="text-sm text-gray-500">{currency}</span>
-      </p>
+    <div className="border rounded px-3 py-1.5 dark:border-gray-700 inline-flex items-center gap-2">
+      <span className="text-sm text-gray-500">{label}:</span>
+      <span className="font-mono font-semibold">
+        {parseFloat(amount).toLocaleString()}
+      </span>
+      <span className="text-sm text-gray-500">{currency}</span>
     </div>
   );
 }
