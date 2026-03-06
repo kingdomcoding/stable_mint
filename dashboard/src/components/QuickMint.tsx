@@ -27,7 +27,7 @@ export default function QuickMint({
         currency: "ACME",
         idempotencyKey: crypto.randomUUID(),
       });
-      setResult(`Minted 1,000 ACME → transfer ${transfer.id.slice(0, 8)}...`);
+      setResult(`Minted 1,000 ACME → transfer ${transfer.id.slice(0, 8)}... — check Transfers page to see it in the table`);
       onSuccess();
     } catch (err) {
       setResult(String(err));

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { StableMintClient } from "@/lib/api-client";
-import type { Stablecoin, AuditResult } from "@/lib/types";
+import type { Stablecoin, Deployment, Account, Address, AuditResult } from "@/lib/types";
+import QuickMint from "@/components/QuickMint";
 
 const GITHUB_URL = "https://github.com/kingdomcoding/stable_mint";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4400/api";
@@ -39,17 +40,31 @@ const highlights = [
 
 export default function OverviewPage() {
   const [stablecoins, setStablecoins] = useState<Stablecoin[]>([]);
+  const [deployments, setDeployments] = useState<Deployment[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [audit, setAudit] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  function refreshStats() {
+    StableMintClient.getStablecoins().then(setStablecoins);
+    StableMintClient.getAudit().then(setAudit);
+  }
 
   useEffect(() => {
     Promise.all([
       StableMintClient.getStablecoins(),
+      StableMintClient.getDeployments(),
+      StableMintClient.getAccounts(),
       StableMintClient.getAudit(),
     ])
-      .then(([coins, auditResult]) => {
+      .then(async ([coins, deps, accts, auditResult]) => {
         setStablecoins(coins);
+        setDeployments(deps);
         setAudit(auditResult);
+        const allAddresses = await Promise.all(
+          accts.map((a: Account) => StableMintClient.getAddresses(a.id))
+        );
+        setAddresses(allAddresses.flat());
       })
       .catch((err) => setError(String(err)));
   }, []);
@@ -155,10 +170,20 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      <p className="text-sm text-gray-500">
-        Use the sidebar to explore stablecoins, trigger mints/burns,
-        view transfers, and inspect the double-entry ledger.
-      </p>
+      {(() => {
+        const ethDep = deployments.find((d) => d.chain === "ethereum");
+        const ethAddr = addresses.find((a) => a.chain === "ethereum");
+        if (ethDep && ethAddr) {
+          return (
+            <QuickMint
+              deployment={ethDep}
+              address={ethAddr}
+              onSuccess={refreshStats}
+            />
+          );
+        }
+        return null;
+      })()}
     </div>
   );
 }
