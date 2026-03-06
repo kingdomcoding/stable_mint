@@ -19,10 +19,15 @@ defmodule StableMint.Platform do
 
       base_route "/transfers", StableMint.Platform.Transfer do
         get :read
+        index :read
       end
 
       base_route "/ledger/entries", StableMint.Platform.LedgerEntry do
         index :read
+      end
+
+      base_route "/accounts/:account_id/ledger_entries", StableMint.Platform.LedgerEntry do
+        index :by_account
       end
     end
   end

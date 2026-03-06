@@ -8,6 +8,7 @@ defmodule StableMint.Stablecoins do
         get :read
         index :read
         post :create
+        patch :pause
       end
 
       base_route "/deployments", StableMint.Stablecoins.Deployment do

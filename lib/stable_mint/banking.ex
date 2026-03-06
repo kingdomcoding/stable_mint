@@ -8,6 +8,7 @@ defmodule StableMint.Banking do
         get :read
         index :read
         post :create
+        patch :suspend
       end
 
       base_route "/accounts/:account_id/addresses", StableMint.Banking.Address do
