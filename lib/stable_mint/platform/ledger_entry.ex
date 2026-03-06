@@ -30,8 +30,8 @@ defmodule StableMint.Platform.LedgerEntry do
   end
 
   relationships do
-    belongs_to :transfer, StableMint.Platform.Transfer, allow_nil?: false
-    belongs_to :account, StableMint.Banking.Account, allow_nil?: false
+    belongs_to :transfer, StableMint.Platform.Transfer, allow_nil?: false, public?: true
+    belongs_to :account, StableMint.Banking.Account, allow_nil?: false, public?: true
   end
 
   actions do
