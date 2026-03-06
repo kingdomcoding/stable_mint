@@ -13,13 +13,13 @@ defmodule StableMint.Platform do
       end
 
       base_route "/accounts/:account_id/transfers", StableMint.Platform.Transfer do
-        post :transfer
         index :by_account
       end
 
       base_route "/transfers", StableMint.Platform.Transfer do
         get :read
         index :read
+        post :transfer
       end
 
       base_route "/ledger/entries", StableMint.Platform.LedgerEntry do

@@ -272,7 +272,6 @@ export const StableMintClient = {
   },
 
   async transfer(params: {
-    accountId: string;
     deploymentId: string;
     sourceAddressId: string;
     destinationAddressId: string;
@@ -281,7 +280,7 @@ export const StableMintClient = {
     idempotencyKey: string;
   }): Promise<Transfer> {
     const doc = await request<JsonApiDocument<Omit<Transfer, "id">>>(
-      `/accounts/${params.accountId}/transfers`,
+      "/transfers",
       {
         method: "POST",
         headers: { "Idempotency-Key": params.idempotencyKey },

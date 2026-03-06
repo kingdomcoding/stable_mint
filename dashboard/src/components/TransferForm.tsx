@@ -49,7 +49,6 @@ export default function TransferForm({
     setResult(null);
     try {
       const transfer = await StableMintClient.transfer({
-        accountId: sourceAccountId,
         deploymentId,
         sourceAddressId: sourceAddrId,
         destinationAddressId: destAddrId,
