@@ -28,10 +28,13 @@ export default function ActivityPage() {
     return accounts.find((a) => a.id === id)?.name ?? id.slice(0, 8) + "...";
   };
 
-  const filtered =
+  const filtered = (
     typeFilter === "all"
       ? transfers
-      : transfers.filter((t) => t.type === typeFilter);
+      : transfers.filter((t) => t.type === typeFilter)
+  ).sort(
+    (a, b) => new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime()
+  );
 
   return (
     <div>

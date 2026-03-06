@@ -28,9 +28,13 @@ export default function LedgerPage() {
   const accountName = (id: string) =>
     accounts.find((a) => a.id === id)?.name ?? id.slice(0, 8) + "...";
 
-  const filtered = accountFilter
-    ? entries.filter((e) => e.account_id === accountFilter)
-    : entries;
+  const filtered = (
+    accountFilter
+      ? entries.filter((e) => e.account_id === accountFilter)
+      : entries
+  ).sort(
+    (a, b) => new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime()
+  );
 
   if (error) {
     return <p className="text-red-500">Failed to load: {error}</p>;

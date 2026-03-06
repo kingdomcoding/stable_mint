@@ -66,7 +66,9 @@ export default function OverviewPage() {
     return accounts.find((a) => a.id === id)?.name ?? id.slice(0, 8) + "...";
   };
 
-  const recentTransfers = transfers.slice(0, 5);
+  const recentTransfers = [...transfers]
+    .sort((a, b) => new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime())
+    .slice(0, 5);
   const maxSupply = Math.max(
     ...stablecoins.map((c) => parseFloat(c.total_supply || "0")),
     1
