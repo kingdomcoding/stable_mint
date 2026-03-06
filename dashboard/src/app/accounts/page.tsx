@@ -65,6 +65,7 @@ export default function AccountsPage() {
   }, [loadData]);
 
   async function handleSuspend(account: Account) {
+    if (!confirm(`Suspend ${account.name}? The account will be unable to transact.`)) return;
     try {
       await StableMintClient.suspendAccount(account.id);
       loadData();

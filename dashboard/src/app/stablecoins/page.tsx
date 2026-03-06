@@ -41,6 +41,7 @@ export default function StablecoinsPage() {
   }, [loadData]);
 
   async function handlePause(coin: Stablecoin) {
+    if (!confirm(`Pause ${coin.symbol}? This will disable all mint and burn operations.`)) return;
     try {
       await StableMintClient.pauseStablecoin(coin.id);
       loadData();
