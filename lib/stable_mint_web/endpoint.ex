@@ -23,6 +23,7 @@ defmodule StableMintWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-  plug CORSPlug
+  plug CORSPlug,
+    headers: ["authorization", "content-type", "accept", "origin", "idempotency-key"]
   plug StableMintWeb.Router
 end
