@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { StableMintClient } from "@/lib/api-client";
-import type { Account, Address, Deployment, Transfer } from "@/lib/types";
+import type { Account, Address, Deployment, Transfer, Stablecoin } from "@/lib/types";
 
 export default function TransferForm({
   sourceAccountId,
@@ -10,6 +10,7 @@ export default function TransferForm({
   allAccounts,
   allAddresses,
   deployments,
+  stablecoins,
   onSuccess,
 }: {
   sourceAccountId: string;
@@ -17,6 +18,7 @@ export default function TransferForm({
   allAccounts: Account[];
   allAddresses: (Address & { accountName: string })[];
   deployments: Deployment[];
+  stablecoins: Stablecoin[];
   onSuccess: (transfer: Transfer) => void;
 }) {
   const [destAccountId, setDestAccountId] = useState("");
@@ -24,7 +26,6 @@ export default function TransferForm({
   const [destAddrId, setDestAddrId] = useState("");
   const [deploymentId, setDeploymentId] = useState("");
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
@@ -35,6 +36,9 @@ export default function TransferForm({
   const destAddresses = allAddresses.filter((a) => a.account_id === destAccountId);
 
   const selectedDep = deployments.find((d) => d.id === deploymentId);
+  const derivedCurrency = selectedDep
+    ? stablecoins.find((c) => c.id === selectedDep.stablecoin_id)?.symbol ?? ""
+    : "";
   const filteredSourceAddrs = selectedDep
     ? sourceAddresses.filter((a) => a.chain === selectedDep.chain)
     : sourceAddresses;
@@ -53,7 +57,7 @@ export default function TransferForm({
         sourceAddressId: sourceAddrId,
         destinationAddressId: destAddrId,
         amount,
-        currency,
+        currency: derivedCurrency,
         idempotencyKey: crypto.randomUUID(),
       });
       setAmount("");
@@ -155,20 +159,17 @@ export default function TransferForm({
             required
           />
         </div>
-        <div>
-          <label className="text-xs text-gray-500">Currency</label>
-          <input
-            type="text"
-            className="block w-16 border rounded px-2 py-1.5 text-sm font-mono dark:bg-gray-800 dark:border-gray-600"
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-            placeholder="ACME"
-            required
-          />
-        </div>
+        {derivedCurrency && (
+          <div>
+            <label className="text-xs text-gray-500">Currency</label>
+            <p className="block px-2 py-1.5 text-sm font-mono text-gray-700 dark:text-gray-300">
+              {derivedCurrency}
+            </p>
+          </div>
+        )}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !derivedCurrency}
           className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? "..." : "Transfer"}

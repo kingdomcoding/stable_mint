@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { StableMintClient } from "@/lib/api-client";
-import type { Account, Address, Deployment } from "@/lib/types";
+import type { Account, Address, Deployment, Stablecoin } from "@/lib/types";
 import ChainBadge from "@/components/ChainBadge";
 import CreateAccountForm from "@/components/CreateAccountForm";
 import AddAddressForm from "@/components/AddAddressForm";
@@ -14,6 +14,7 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [addresses, setAddresses] = useState<(Address & { accountName: string })[]>([]);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
+  const [stablecoins, setStablecoins] = useState<Stablecoin[]>([]);
   const [balances, setBalances] = useState<
     Record<string, { currency: string; amount: string }[]>
   >({});
@@ -23,10 +24,12 @@ export default function AccountsPage() {
     Promise.all([
       StableMintClient.getAccounts(),
       StableMintClient.getDeployments(),
+      StableMintClient.getStablecoins(),
     ])
-      .then(async ([accts, deps]) => {
+      .then(async ([accts, deps, coins]) => {
         setAccounts(accts);
         setDeployments(deps);
+        setStablecoins(coins);
 
         const allAddresses = await Promise.all(
           accts.map((a) => StableMintClient.getAddresses(a.id))
@@ -203,6 +206,7 @@ export default function AccountsPage() {
                   allAccounts={accounts}
                   allAddresses={addresses}
                   deployments={deployments}
+                  stablecoins={stablecoins}
                   onSuccess={() => loadData()}
                 />
               )}
