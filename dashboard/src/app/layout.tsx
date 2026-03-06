@@ -52,7 +52,7 @@ export default function RootLayout({
               </ul>
             </div>
             <div className="pt-6 border-t dark:border-gray-800">
-              <p className="text-xs text-gray-400 mb-2">Portfolio project by Jos</p>
+              <p className="text-xs text-gray-400 mb-2">Built by Oreoluwa for Brale</p>
               <a
                 href="https://github.com/kingdomcoding/stable_mint"
                 target="_blank"
