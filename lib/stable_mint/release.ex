@@ -17,10 +17,20 @@ defmodule StableMint.Release do
         IO.puts("Seed data already exists, skipping.")
 
       _ ->
-        {:ok, coin} = StableMint.Stablecoins.create_stablecoin("Acme Dollar", "ACME")
-        {:ok, eth_deploy} = StableMint.Stablecoins.deploy_to_chain(coin.id, :ethereum)
-        StableMint.Stablecoins.deploy_to_chain(coin.id, :solana)
-        StableMint.Stablecoins.deploy_to_chain(coin.id, :stellar)
+        {:ok, acme} = StableMint.Stablecoins.create_stablecoin("Acme Dollar", "ACME")
+        {:ok, eurc} = StableMint.Stablecoins.create_stablecoin("Euro Coin", "EURC")
+        {:ok, gbps} = StableMint.Stablecoins.create_stablecoin("Pound Stable", "GBPS")
+
+        {:ok, acme_eth} = StableMint.Stablecoins.deploy_to_chain(acme.id, :ethereum)
+        StableMint.Stablecoins.deploy_to_chain(acme.id, :solana)
+        StableMint.Stablecoins.deploy_to_chain(acme.id, :stellar)
+
+        {:ok, eurc_eth} = StableMint.Stablecoins.deploy_to_chain(eurc.id, :ethereum)
+        StableMint.Stablecoins.deploy_to_chain(eurc.id, :stellar)
+
+        StableMint.Stablecoins.deploy_to_chain(gbps.id, :ethereum)
+        {:ok, gbps_reloaded} = StableMint.Stablecoins.get_stablecoin(gbps.id)
+        StableMint.Stablecoins.pause_stablecoin(gbps_reloaded)
 
         {:ok, issuer} = StableMint.Banking.create_account("Acme Treasury", :issuer, :platform)
         {:ok, alice} = StableMint.Banking.create_account("Alice Corp", :customer, :platform)
@@ -47,27 +57,52 @@ defmodule StableMint.Release do
         )
 
         StableMint.Platform.mint!(%{
-          deployment_id: eth_deploy.id,
+          deployment_id: acme_eth.id,
           destination_address_id: alice_eth.id,
           amount: "10000",
           currency: "ACME",
-          idempotency_key: "seed-mint-alice-1"
+          idempotency_key: "seed-mint-acme-alice-1"
         })
 
         StableMint.Platform.mint!(%{
-          deployment_id: eth_deploy.id,
+          deployment_id: acme_eth.id,
           destination_address_id: bob_eth.id,
           amount: "5000",
           currency: "ACME",
-          idempotency_key: "seed-mint-bob-1"
+          idempotency_key: "seed-mint-acme-bob-1"
         })
 
         StableMint.Platform.burn!(%{
-          deployment_id: eth_deploy.id,
+          deployment_id: acme_eth.id,
           source_address_id: alice_eth.id,
           amount: "1000",
           currency: "ACME",
-          idempotency_key: "seed-burn-alice-1"
+          idempotency_key: "seed-burn-acme-alice-1"
+        })
+
+        StableMint.Platform.transfer!(%{
+          deployment_id: acme_eth.id,
+          source_address_id: alice_eth.id,
+          destination_address_id: bob_eth.id,
+          amount: "500",
+          currency: "ACME",
+          idempotency_key: "seed-transfer-acme-alice-bob-1"
+        })
+
+        StableMint.Platform.mint!(%{
+          deployment_id: eurc_eth.id,
+          destination_address_id: alice_eth.id,
+          amount: "5000",
+          currency: "EURC",
+          idempotency_key: "seed-mint-eurc-alice-1"
+        })
+
+        StableMint.Platform.mint!(%{
+          deployment_id: eurc_eth.id,
+          destination_address_id: bob_eth.id,
+          amount: "2000",
+          currency: "EURC",
+          idempotency_key: "seed-mint-eurc-bob-1"
         })
 
         IO.puts("Seed data created successfully!")
