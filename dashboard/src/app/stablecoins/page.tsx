@@ -6,6 +6,7 @@ import type { Stablecoin, Deployment, Address, Account } from "@/lib/types";
 import MintForm from "@/components/MintForm";
 import BurnForm from "@/components/BurnForm";
 import ChainBadge from "@/components/ChainBadge";
+import QuickMint from "@/components/QuickMint";
 
 export default function StablecoinsPage() {
   const [stablecoins, setStablecoins] = useState<Stablecoin[]>([]);
@@ -43,6 +44,23 @@ export default function StablecoinsPage() {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Stablecoins</h2>
+
+      {(() => {
+        const ethDep = deployments.find((d) => d.chain === "ethereum");
+        const ethAddr = addresses.find((a) => a.chain === "ethereum");
+        if (ethDep && ethAddr) {
+          return (
+            <div className="mb-6">
+              <QuickMint
+                deployment={ethDep}
+                address={ethAddr}
+                onSuccess={loadData}
+              />
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <MintForm

@@ -29,6 +29,21 @@ export default function LedgerPage() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Ledger</h2>
 
+      <div className="border rounded-lg p-4 mb-6 dark:border-gray-700 bg-blue-50 dark:bg-blue-950">
+        <h3 className="font-semibold mb-1">How the Ledger Works</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Every transfer produces exactly two entries: a <strong>debit</strong> from
+          the source and a <strong>credit</strong> to the destination. For mints,
+          the source is a virtual reserve account. The totals must always
+          balance — if they don&apos;t, something is wrong. This invariant is
+          verified by the{" "}
+          <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">
+            /api/ledger/audit
+          </code>{" "}
+          endpoint.
+        </p>
+      </div>
+
       {audit && (
         <div
           className={`border rounded-lg p-4 mb-6 ${

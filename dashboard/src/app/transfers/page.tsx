@@ -14,7 +14,11 @@ export default function TransfersPage() {
 
   useEffect(() => {
     StableMintClient.getAccounts()
-      .then(setAccounts)
+      .then((accts) => {
+        setAccounts(accts);
+        const customer = accts.find((a) => a.type === "customer");
+        if (customer) setSelectedAccount(customer.id);
+      })
       .catch((err) => setError(String(err)));
   }, []);
 
