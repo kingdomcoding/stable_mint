@@ -35,10 +35,11 @@ export default function TransferForm({
   );
   const destAddresses = allAddresses.filter((a) => a.account_id === destAccountId);
 
+  const coinSymbol = (dep: Deployment) =>
+    stablecoins.find((c) => c.id === dep.stablecoin_id)?.symbol ?? "";
+
   const selectedDep = deployments.find((d) => d.id === deploymentId);
-  const derivedCurrency = selectedDep
-    ? stablecoins.find((c) => c.id === selectedDep.stablecoin_id)?.symbol ?? ""
-    : "";
+  const derivedCurrency = selectedDep ? coinSymbol(selectedDep) : "";
   const filteredSourceAddrs = selectedDep
     ? sourceAddresses.filter((a) => a.chain === selectedDep.chain)
     : sourceAddresses;
@@ -110,7 +111,7 @@ export default function TransferForm({
             <option value="">Select</option>
             {deployments.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.chain}
+                {coinSymbol(d)} — {d.chain}
               </option>
             ))}
           </select>
