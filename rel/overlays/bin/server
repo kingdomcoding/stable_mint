@@ -1,3 +1,4 @@
 #!/bin/sh
 cd -P -- "$(dirname -- "$0")/.."
+./bin/stable_mint eval "StableMint.Release.migrate()"
 PHX_SERVER=true exec ./bin/stable_mint start

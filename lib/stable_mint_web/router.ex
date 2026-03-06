@@ -8,6 +8,7 @@ defmodule StableMintWeb.Router do
 
   scope "/api" do
     pipe_through :api
+    get "/ledger/audit", StableMintWeb.AuditController, :show
     forward "/", StableMintWeb.AshJsonApiRouter
   end
 end
