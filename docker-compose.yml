@@ -34,7 +34,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:4400/api
+      NEXT_PUBLIC_API_URL: https://stablemint-api.josboxoffice.com/api
     depends_on:
       - api
     restart: always
