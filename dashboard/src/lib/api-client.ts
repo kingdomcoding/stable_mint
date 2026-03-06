@@ -301,6 +301,7 @@ export const StableMintClient = {
           data: {
             type: "addresses",
             attributes: {
+              account_id: params.accountId,
               chain: params.chain,
               address: params.address,
               ...(params.label && { label: params.label }),
