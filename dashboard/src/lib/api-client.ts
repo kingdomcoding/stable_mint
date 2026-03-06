@@ -39,6 +39,19 @@ async function request<T>(
 
   if (!res.ok) {
     const body = await res.text();
+    try {
+      const parsed = JSON.parse(body);
+      if (Array.isArray(parsed.errors) && parsed.errors.length > 0) {
+        const messages = parsed.errors.map(
+          (e: { detail?: string; title?: string }) => e.detail || e.title || "Unknown error"
+        );
+        throw new Error(messages.join("; "));
+      }
+    } catch (parseErr) {
+      if (parseErr instanceof Error && parseErr.message !== `API ${res.status}: ${body}`) {
+        throw parseErr;
+      }
+    }
     throw new Error(`API ${res.status}: ${body}`);
   }
 
