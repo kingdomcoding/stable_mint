@@ -95,7 +95,6 @@ export const StableMintClient = {
             attributes: {
               amount: params.amount,
               currency: params.currency,
-              deployment_id: params.deploymentId,
               destination_address_id: params.destinationAddressId,
               idempotency_key: params.idempotencyKey,
             },
@@ -126,7 +125,6 @@ export const StableMintClient = {
             attributes: {
               amount: params.amount,
               currency: params.currency,
-              deployment_id: params.deploymentId,
               source_address_id: params.sourceAddressId,
               idempotency_key: params.idempotencyKey,
             },
