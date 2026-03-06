@@ -53,7 +53,8 @@ defmodule StableMint.MixProject do
       {:ash_postgres, "~> 2.0"},
       {:ash_json_api, "~> 1.0"},
       {:ash_phoenix, "~> 2.0"},
-      {:cors_plug, "~> 3.0"}
+      {:cors_plug, "~> 3.0"},
+      {:open_api_spex, "~> 3.0"}
     ]
   end
 
