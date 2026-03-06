@@ -4,6 +4,12 @@ A toy stablecoin issuance and orchestration platform inspired by
 [Brale](https://brale.xyz). Built with Elixir/Phoenix + Ash Framework +
 TypeScript/Next.js.
 
+## Live Demo
+
+- **Dashboard**: https://stablemint.josboxoffice.com
+- **API**: https://stablemint-api.josboxoffice.com/api
+- **OpenAPI**: https://stablemint-api.josboxoffice.com/api/open_api
+
 ## Quick Start
 
 ```bash
