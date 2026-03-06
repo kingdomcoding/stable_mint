@@ -31,12 +31,16 @@ export default function TransferForm({
   const [result, setResult] = useState<string | null>(null);
 
   const otherAccounts = allAccounts.filter(
-    (a) => a.id !== sourceAccountId && a.type === "customer"
+    (a) => a.id !== sourceAccountId && a.type === "customer" && a.status === "active"
   );
   const destAddresses = allAddresses.filter((a) => a.account_id === destAccountId);
 
   const coinSymbol = (dep: Deployment) =>
     stablecoins.find((c) => c.id === dep.stablecoin_id)?.symbol ?? "";
+
+  const activeDeployments = deployments.filter(
+    (d) => stablecoins.find((c) => c.id === d.stablecoin_id)?.status === "active"
+  );
 
   const selectedDep = deployments.find((d) => d.id === deploymentId);
   const derivedCurrency = selectedDep ? coinSymbol(selectedDep) : "";
@@ -109,7 +113,7 @@ export default function TransferForm({
             required
           >
             <option value="">Select</option>
-            {deployments.map((d) => (
+            {activeDeployments.map((d) => (
               <option key={d.id} value={d.id}>
                 {coinSymbol(d)} — {d.chain}
               </option>
