@@ -40,6 +40,18 @@ export default function ActivityPage() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Activity</h2>
 
+      <div className="border rounded-lg p-4 mb-6 dark:border-gray-700 bg-blue-50 dark:bg-blue-950">
+        <h3 className="font-semibold mb-1">Transaction Log</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          All mints, burns, and peer-to-peer transfers are recorded here. Each
+          transaction flows through the double-entry ledger — check the{" "}
+          <a href="/ledger" className="underline hover:text-gray-900 dark:hover:text-gray-200">
+            Ledger
+          </a>{" "}
+          page to verify the audit trail.
+        </p>
+      </div>
+
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
       <div className="flex gap-2 mb-4">
