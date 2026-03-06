@@ -143,4 +143,169 @@ export const StableMintClient = {
   async getAudit(): Promise<AuditResult> {
     return request<AuditResult>("/ledger/audit");
   },
+
+  async createStablecoin(params: {
+    name: string;
+    symbol: string;
+    decimals?: number;
+  }): Promise<Stablecoin> {
+    const doc = await request<JsonApiDocument<Omit<Stablecoin, "id">>>(
+      "/stablecoins",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          data: {
+            type: "stablecoins",
+            attributes: {
+              name: params.name,
+              symbol: params.symbol,
+              ...(params.decimals !== undefined && { decimals: params.decimals }),
+            },
+          },
+        }),
+      }
+    );
+    return extractOne(doc) as Stablecoin;
+  },
+
+  async pauseStablecoin(id: string): Promise<Stablecoin> {
+    const doc = await request<JsonApiDocument<Omit<Stablecoin, "id">>>(
+      `/stablecoins/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          data: { type: "stablecoins", attributes: {} },
+        }),
+      }
+    );
+    return extractOne(doc) as Stablecoin;
+  },
+
+  async deployToChain(params: {
+    stablecoinId: string;
+    chain: "ethereum" | "solana" | "stellar";
+  }): Promise<Deployment> {
+    const doc = await request<JsonApiDocument<Omit<Deployment, "id">>>(
+      "/deployments",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          data: {
+            type: "deployments",
+            attributes: {
+              chain: params.chain,
+              stablecoin_id: params.stablecoinId,
+            },
+          },
+        }),
+      }
+    );
+    return extractOne(doc) as Deployment;
+  },
+
+  async createAccount(params: {
+    name: string;
+    type: "issuer" | "customer";
+    custodyModel: "platform" | "self";
+  }): Promise<Account> {
+    const doc = await request<JsonApiDocument<Omit<Account, "id">>>(
+      "/accounts",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          data: {
+            type: "accounts",
+            attributes: {
+              name: params.name,
+              type: params.type,
+              custody_model: params.custodyModel,
+            },
+          },
+        }),
+      }
+    );
+    return extractOne(doc) as Account;
+  },
+
+  async suspendAccount(id: string): Promise<Account> {
+    const doc = await request<JsonApiDocument<Omit<Account, "id">>>(
+      `/accounts/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          data: { type: "accounts", attributes: {} },
+        }),
+      }
+    );
+    return extractOne(doc) as Account;
+  },
+
+  async createAddress(params: {
+    accountId: string;
+    chain: "ethereum" | "solana" | "stellar";
+    address: string;
+    label?: string;
+  }): Promise<Address> {
+    const doc = await request<JsonApiDocument<Omit<Address, "id">>>(
+      `/accounts/${params.accountId}/addresses`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          data: {
+            type: "addresses",
+            attributes: {
+              chain: params.chain,
+              address: params.address,
+              ...(params.label && { label: params.label }),
+            },
+          },
+        }),
+      }
+    );
+    return extractOne(doc) as Address;
+  },
+
+  async transfer(params: {
+    accountId: string;
+    deploymentId: string;
+    sourceAddressId: string;
+    destinationAddressId: string;
+    amount: string;
+    currency: string;
+    idempotencyKey: string;
+  }): Promise<Transfer> {
+    const doc = await request<JsonApiDocument<Omit<Transfer, "id">>>(
+      `/accounts/${params.accountId}/transfers`,
+      {
+        method: "POST",
+        headers: { "Idempotency-Key": params.idempotencyKey },
+        body: JSON.stringify({
+          data: {
+            type: "transfers",
+            attributes: {
+              deployment_id: params.deploymentId,
+              source_address_id: params.sourceAddressId,
+              destination_address_id: params.destinationAddressId,
+              amount: params.amount,
+              currency: params.currency,
+              idempotency_key: params.idempotencyKey,
+            },
+          },
+        }),
+      }
+    );
+    return extractOne(doc) as Transfer;
+  },
+
+  async getAllTransfers(): Promise<Transfer[]> {
+    const doc = await request<JsonApiDocument<Omit<Transfer, "id">>>("/transfers");
+    return extractAttributes(doc) as Transfer[];
+  },
+
+  async getLedgerEntriesForAccount(accountId: string): Promise<LedgerEntry[]> {
+    const doc = await request<JsonApiDocument<Omit<LedgerEntry, "id">>>(
+      `/accounts/${accountId}/ledger_entries`
+    );
+    return extractAttributes(doc) as LedgerEntry[];
+  },
 };
