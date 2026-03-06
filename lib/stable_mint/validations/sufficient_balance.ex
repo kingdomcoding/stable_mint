@@ -7,20 +7,26 @@ defmodule StableMint.Validations.SufficientBalance do
     amount = Ash.Changeset.get_attribute(changeset, :amount)
     currency = Ash.Changeset.get_attribute(changeset, :currency)
 
-    {:ok, address} = StableMint.Banking.get_address(source_id)
+    case StableMint.Banking.get_address(source_id) do
+      {:ok, address} ->
+        balance =
+          case StableMint.Platform.get_balance(address.account_id, currency) do
+            {:ok, [%{balance_after: b}]} -> b
+            _ -> Decimal.new(0)
+          end
 
-    balance =
-      case StableMint.Platform.get_balance(address.account_id, currency) do
-        {:ok, [%{balance_after: b}]} -> b
-        _ -> Decimal.new(0)
-      end
+        if Decimal.gte?(balance, amount) do
+          :ok
+        else
+          {:error, Ash.Error.Changes.InvalidAttribute.exception(
+            field: :amount, message: "insufficient balance (have: #{balance}, need: #{amount})"
+          )}
+        end
 
-    if Decimal.gte?(balance, amount) do
-      :ok
-    else
-      {:error, Ash.Error.Changes.InvalidAttribute.exception(
-        field: :amount, message: "insufficient balance (have: #{balance}, need: #{amount})"
-      )}
+      {:error, _} ->
+        {:error, Ash.Error.Changes.InvalidAttribute.exception(
+          field: :source_address_id, message: "source address not found"
+        )}
     end
   end
 end
