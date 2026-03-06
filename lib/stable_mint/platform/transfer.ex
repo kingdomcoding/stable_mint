@@ -16,14 +16,16 @@ defmodule StableMint.Platform.Transfer do
   attributes do
     uuid_primary_key :id
 
-    attribute :idempotency_key, :string, allow_nil?: false
+    attribute :idempotency_key, :string, allow_nil?: false, public?: true
 
     attribute :type, :atom do
       allow_nil? false
+      public? true
       constraints one_of: [:mint, :burn, :transfer]
     end
 
     attribute :status, :atom do
+      public? true
       constraints one_of: [:pending, :processing, :complete, :failed]
       default :pending
     end
@@ -32,16 +34,18 @@ defmodule StableMint.Platform.Transfer do
     attribute :currency, :string, allow_nil?: false, public?: true
 
     attribute :source_type, :atom do
+      public? true
       constraints one_of: [:address, :fiat_account, :reserve]
     end
 
-    attribute :source_id, :uuid
+    attribute :source_id, :uuid, public?: true
 
     attribute :destination_type, :atom do
+      public? true
       constraints one_of: [:address, :fiat_account, :reserve]
     end
 
-    attribute :destination_id, :uuid
+    attribute :destination_id, :uuid, public?: true
 
     attribute :chain_tx_hash, :string, public?: true
     attribute :error_reason, :string, public?: true
