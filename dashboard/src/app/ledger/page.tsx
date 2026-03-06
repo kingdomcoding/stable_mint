@@ -2,24 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { StableMintClient } from "@/lib/api-client";
-import type { LedgerEntry, AuditResult } from "@/lib/types";
+import type { LedgerEntry, AuditResult, Account } from "@/lib/types";
 
 export default function LedgerPage() {
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [audit, setAudit] = useState<AuditResult | null>(null);
+  const [accountFilter, setAccountFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
       StableMintClient.getLedgerEntries(),
+      StableMintClient.getAccounts(),
       StableMintClient.getAudit(),
     ])
-      .then(([e, a]) => {
+      .then(([e, a, au]) => {
         setEntries(e);
-        setAudit(a);
+        setAccounts(a);
+        setAudit(au);
       })
       .catch((err) => setError(String(err)));
   }, []);
+
+  const accountName = (id: string) =>
+    accounts.find((a) => a.id === id)?.name ?? id.slice(0, 8) + "...";
+
+  const filtered = accountFilter
+    ? entries.filter((e) => e.account_id === accountFilter)
+    : entries;
 
   if (error) {
     return <p className="text-red-500">Failed to load: {error}</p>;
@@ -32,9 +43,9 @@ export default function LedgerPage() {
       <div className="border rounded-lg p-4 mb-6 dark:border-gray-700 bg-blue-50 dark:bg-blue-950">
         <h3 className="font-semibold mb-1">How the Ledger Works</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Every transfer produces exactly two entries: a <strong>debit</strong> from
-          the source and a <strong>credit</strong> to the destination. For mints,
-          the source is a virtual reserve account. The totals must always
+          Every transfer produces exactly two entries: a <strong>debit</strong>{" "}
+          from the source and a <strong>credit</strong> to the destination. For
+          mints, the source is a virtual reserve account. The totals must always
           balance — if they don&apos;t, something is wrong. This invariant is
           verified by the{" "}
           <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">
@@ -56,11 +67,27 @@ export default function LedgerPage() {
             {audit.balanced ? "Ledger is balanced" : "Ledger is UNBALANCED"}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Debits: {audit.total_debits ?? "0"} | Credits:{" "}
-            {audit.total_credits ?? "0"}
+            Debits: {parseFloat(audit.total_debits ?? "0").toLocaleString()} |
+            Credits: {parseFloat(audit.total_credits ?? "0").toLocaleString()}
           </p>
         </div>
       )}
+
+      <div className="mb-4">
+        <label className="text-sm font-medium mr-2">Filter by account:</label>
+        <select
+          className="border rounded px-3 py-1.5 text-sm dark:bg-gray-800 dark:border-gray-600"
+          value={accountFilter}
+          onChange={(e) => setAccountFilter(e.target.value)}
+        >
+          <option value="">All accounts</option>
+          {accounts.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <table className="w-full text-sm">
         <thead>
@@ -74,7 +101,7 @@ export default function LedgerPage() {
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry) => (
+          {filtered.map((entry) => (
             <tr key={entry.id} className="border-b dark:border-gray-800">
               <td className="py-2">
                 <span
@@ -87,20 +114,20 @@ export default function LedgerPage() {
                   {entry.entry_type}
                 </span>
               </td>
-              <td className="py-2 font-mono">{entry.amount}</td>
+              <td className="py-2 font-mono">
+                {parseFloat(entry.amount).toLocaleString()}
+              </td>
               <td className="py-2">{entry.currency}</td>
               <td className="py-2 text-right font-mono">
-                {entry.balance_after}
+                {parseFloat(entry.balance_after).toLocaleString()}
               </td>
-              <td className="py-2 font-mono text-xs truncate max-w-[100px]">
-                {entry.account_id}
-              </td>
+              <td className="py-2 text-sm">{accountName(entry.account_id)}</td>
               <td className="py-2 text-gray-500">
-                {new Date(entry.inserted_at).toLocaleDateString()}
+                {new Date(entry.inserted_at).toLocaleString()}
               </td>
             </tr>
           ))}
-          {entries.length === 0 && (
+          {filtered.length === 0 && (
             <tr>
               <td colSpan={6} className="py-4 text-center text-gray-500">
                 No ledger entries
