@@ -20,6 +20,7 @@ defmodule StableMint.Banking do
   resources do
     resource StableMint.Banking.Account do
       define :create_account, action: :create, args: [:name, :type, :custody_model]
+      define :create_account_with_id, action: :create_with_id, args: [:id, :name, :type, :custody_model]
       define :get_account, action: :read, get_by: [:id]
       define :list_accounts, action: :read
       define :suspend_account, action: :suspend

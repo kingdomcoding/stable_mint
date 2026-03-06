@@ -27,6 +27,8 @@ defmodule StableMint.Platform do
     end
   end
 
+  defdelegate reserve_account_id, to: StableMint.Platform.Transfer
+
   resources do
     resource StableMint.Platform.Transfer do
       define :mint!, action: :mint

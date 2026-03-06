@@ -18,7 +18,7 @@ defmodule StableMint.Release do
 
       _ ->
         {:ok, coin} = StableMint.Stablecoins.create_stablecoin("Acme Dollar", "ACME")
-        StableMint.Stablecoins.deploy_to_chain(coin.id, :ethereum)
+        {:ok, eth_deploy} = StableMint.Stablecoins.deploy_to_chain(coin.id, :ethereum)
         StableMint.Stablecoins.deploy_to_chain(coin.id, :solana)
         StableMint.Stablecoins.deploy_to_chain(coin.id, :stellar)
 
@@ -26,9 +26,9 @@ defmodule StableMint.Release do
         {:ok, alice} = StableMint.Banking.create_account("Alice Corp", :customer, :platform)
         {:ok, bob} = StableMint.Banking.create_account("Bob Inc", :customer, :self)
 
-        StableMint.Banking.create_address(alice.id, :ethereum, "0x" <> String.duplicate("aa", 20))
+        {:ok, alice_eth} = StableMint.Banking.create_address(alice.id, :ethereum, "0x" <> String.duplicate("aa", 20))
         StableMint.Banking.create_address(alice.id, :solana, String.duplicate("A", 44))
-        StableMint.Banking.create_address(bob.id, :ethereum, "0x" <> String.duplicate("bb", 20))
+        {:ok, bob_eth} = StableMint.Banking.create_address(bob.id, :ethereum, "0x" <> String.duplicate("bb", 20))
         StableMint.Banking.create_address(bob.id, :stellar, "G" <> String.duplicate("B", 55))
 
         StableMint.Banking.create_fiat_account(%{
@@ -37,6 +37,37 @@ defmodule StableMint.Release do
           routing_number: "021000021",
           account_number_last4: "4567",
           account_id: issuer.id
+        })
+
+        {:ok, _reserve} = StableMint.Banking.create_account_with_id(
+          StableMint.Platform.reserve_account_id(),
+          "Reserve",
+          :issuer,
+          :platform
+        )
+
+        StableMint.Platform.mint!(%{
+          deployment_id: eth_deploy.id,
+          destination_address_id: alice_eth.id,
+          amount: "10000",
+          currency: "ACME",
+          idempotency_key: "seed-mint-alice-1"
+        })
+
+        StableMint.Platform.mint!(%{
+          deployment_id: eth_deploy.id,
+          destination_address_id: bob_eth.id,
+          amount: "5000",
+          currency: "ACME",
+          idempotency_key: "seed-mint-bob-1"
+        })
+
+        StableMint.Platform.burn!(%{
+          deployment_id: eth_deploy.id,
+          source_address_id: alice_eth.id,
+          amount: "1000",
+          currency: "ACME",
+          idempotency_key: "seed-burn-alice-1"
         })
 
         IO.puts("Seed data created successfully!")

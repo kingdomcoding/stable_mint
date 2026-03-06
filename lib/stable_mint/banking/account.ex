@@ -55,6 +55,16 @@ defmodule StableMint.Banking.Account do
       accept [:name, :type, :custody_model]
     end
 
+    create :create_with_id do
+      accept [:name, :type, :custody_model]
+      argument :id, :uuid, allow_nil?: false
+
+      change fn changeset, _context ->
+        id = Ash.Changeset.get_argument(changeset, :id)
+        Ash.Changeset.force_change_attribute(changeset, :id, id)
+      end
+    end
+
     update :suspend do
       accept []
 
