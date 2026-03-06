@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { StableMintClient } from "@/lib/api-client";
-import type { Deployment } from "@/lib/types";
+import type { Deployment, Transfer } from "@/lib/types";
 
 export default function MintForm({
   deployments,
@@ -11,7 +11,7 @@ export default function MintForm({
 }: {
   deployments: Deployment[];
   addresses: { id: string; address: string; chain: string }[];
-  onSuccess: () => void;
+  onSuccess: (transfer: Transfer) => void;
 }) {
   const [deploymentId, setDeploymentId] = useState("");
   const [addressId, setAddressId] = useState("");
@@ -25,7 +25,7 @@ export default function MintForm({
     setLoading(true);
     setError(null);
     try {
-      await StableMintClient.mint({
+      const transfer = await StableMintClient.mint({
         deploymentId,
         destinationAddressId: addressId,
         amount,
@@ -33,7 +33,7 @@ export default function MintForm({
         idempotencyKey: crypto.randomUUID(),
       });
       setAmount("");
-      onSuccess();
+      onSuccess(transfer);
     } catch (err) {
       setError(String(err));
     } finally {
