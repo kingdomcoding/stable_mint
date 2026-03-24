@@ -1,32 +1,17 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: stable_mint_dev
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   api:
     build: .
     ports:
       - "4400:4400"
     environment:
-      DATABASE_URL: ecto://postgres:postgres@db/stable_mint_dev
+      DATABASE_URL: ecto://stable_mint:stable_mint@shared-postgres/stable_mint_dev
       SECRET_KEY_BASE: "dev-only-secret-key-base-that-is-at-least-64-bytes-long-for-phoenix"
       PHX_SERVER: "true"
       PHX_HOST: "localhost"
       PORT: "4400"
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
+    restart: unless-stopped
+    networks:
+      - shared_pg
 
   dashboard:
     build:
@@ -37,7 +22,8 @@ services:
       NEXT_PUBLIC_API_URL: https://stablemint-api.josboxoffice.com/api
     depends_on:
       - api
-    restart: always
+    restart: unless-stopped
 
-volumes:
-  pgdata:
+networks:
+  shared_pg:
+    external: true
